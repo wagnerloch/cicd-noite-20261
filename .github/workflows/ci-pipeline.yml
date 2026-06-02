@@ -1,0 +1,45 @@
+name: CI Pipeline - Build e Teste (TS/Docker)
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Baixa o código
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      # 2. Configura o Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18 # Mesma versão do Dockerfile
+
+      # 3. Instala dependências (para compilar e testar)
+      - name: Instalar dependências
+        run: npm install
+
+      # 4. Compila o TypeScript
+      # Nosso primeiro teste: O código compila?
+      - name: Compilar (Build)
+        run: npm run build
+      
+      # (Opcional) Se tivéssemos testes (jest), rodaríamos aqui:
+      # - name: Rodar testes unitários
+      #   run: npm test
+
+      # 5. Configura o Docker
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # 6. Constrói a imagem Docker
+      # Nosso segundo teste: O Dockerfile está correto?
+      # Isso vai rodar o build multi-stage completo.
+      - name: Build da imagem Docker
+        run: docker build . --file Dockerfile --tag meu-app-ts:$(date +%s)
